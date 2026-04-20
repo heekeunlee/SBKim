@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CogARCH Simulation Companion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="container">
+        <h1>CogARCH Companion</h1>
+        <p>BIM 기반 인지 에이전트 길 찾기 시뮬레이션을 위한 노코드 가이드 & 분석 도구</p>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Section 1: Prompt Master -->
+      <section id="prompt-section" class="card fade-in">
+        <div class="card-header">
+          <h2>Step 1. AI 프롬프트 마스터</h2>
+          <p>유니티 코딩을 챗GPT에게 대신 부탁할 완벽한 프롬프트를 만듭니다.</p>
+        </div>
+        <div class="card-body">
+          <label for="prompt-type">구현할 기능을 선택하세요:</label>
+          <select id="prompt-type" class="form-select">
+            <option value="raycast">1. 시야 시스템 (Raycast 가시성 계산)</option>
+            <option value="navigation">2. 인지 네비게이션 로직 (4가지 전략)</option>
+            <option value="logging">3. 데이터 로깅 (CSV 저장)</option>
+          </select>
+          <button id="generate-prompt-btn" class="btn btn-primary">프롬프트 생성하기</button>
+          
+          <div class="prompt-result-container hidden" id="prompt-result-container">
+            <p class="instruction">아래 텍스트를 복사해서 ChatGPT나 Claude에게 붙여넣으세요.</p>
+            <div class="code-box">
+              <pre id="prompt-output"></pre>
+              <button id="copy-prompt-btn" class="btn btn-secondary btn-sm">복사하기</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Parameter Configurator -->
+      <section id="config-section" class="card fade-in">
+        <div class="card-header">
+          <h2>Step 2. 시뮬레이션 매개변수 설정</h2>
+          <p>유니티 코드를 수정하지 않고 실험 변수만 설정하여 파일로 다운로드합니다.</p>
+        </div>
+        <div class="card-body">
+          <div class="controls-grid">
+            <div class="control-group">
+              <label>이동 속도 (Speed): <span id="val-speed">5</span></label>
+              <input type="range" id="input-speed" min="1" max="15" value="5" step="0.5">
+            </div>
+            <div class="control-group">
+              <label>시야각 (FOV): <span id="val-fov">120</span>°</label>
+              <input type="range" id="input-fov" min="45" max="180" value="120" step="5">
+            </div>
+            <div class="control-group">
+              <label>기억 한도 (Memory Limit): <span id="val-memory">10</span>개 노드</label>
+              <input type="range" id="input-memory" min="1" max="50" value="10" step="1">
+            </div>
+          </div>
+          <button id="download-config-btn" class="btn btn-primary">Config.json 다운로드</button>
+          <p class="help-text">다운로드한 폴더를 유니티 프로젝트의 Assets 폴더 안에 넣기만 하면 적용됩니다.</p>
+        </div>
+      </section>
+
+      <!-- Section 3: CSV Visualizer -->
+      <section id="visualizer-section" class="card fade-in">
+        <div class="card-header">
+          <h2>Step 3. 결과 분석 시각화</h2>
+          <p>유니티에서 저장된 이동 경로(log.csv)를 올려 히트맵과 궤적을 확인하세요.</p>
+        </div>
+        <div class="card-body">
+          <div id="drop-zone" class="drop-zone">
+            <p>여기에 log.csv 파일을 드래그 앤 드롭하거나 클릭하여 업로드하세요</p>
+            <input type="file" id="csv-file-input" accept=".csv" class="hidden">
+          </div>
+          
+          <div class="visualization-container hidden" id="viz-container">
+            <h3 class="viz-title">이동 궤적 분석 (Trajectory)</h3>
+            <canvas id="trajectory-canvas" width="600" height="400"></canvas>
+            <div class="viz-actions">
+              <button id="reset-viz-btn" class="btn btn-secondary">초기화</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div class="container">
+        <p>BIM Cognitive Agent Simulation Companion - Designed for Researchers.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

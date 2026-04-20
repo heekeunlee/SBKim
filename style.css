@@ -1,0 +1,268 @@
+:root {
+  --primary-color: #2D63E2;
+  --primary-hover: #1E4BB5;
+  --bg-color: #F8F9FA;
+  --card-bg: #FFFFFF;
+  --text-main: #191F28;
+  --text-sub: #8B95A1;
+  --border-color: #E5E8EB;
+  --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 10px 20px rgba(0, 0, 0, 0.06);
+  --border-radius: 20px;
+  --input-radius: 12px;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --transition: all 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Header */
+.app-header {
+  padding: 60px 0 40px;
+  text-align: center;
+}
+
+.app-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+}
+
+.app-header p {
+  color: var(--text-sub);
+  font-size: 16px;
+}
+
+/* Cards */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  padding: 32px;
+  margin-bottom: 30px;
+  transition: var(--transition);
+  border: 1px solid rgba(229, 232, 235, 0.5);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  margin-bottom: 24px;
+}
+
+.card-header h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.card-header p {
+  color: var(--text-sub);
+  font-size: 14px;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Forms & Buttons */
+.form-select, .btn {
+  font-family: var(--font-family);
+  font-size: 15px;
+  padding: 14px 18px;
+  border-radius: var(--input-radius);
+  outline: none;
+  border: 1px solid var(--border-color);
+}
+
+.form-select {
+  width: 100%;
+  appearance: none;
+  background-color: #fcfcfc;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+label {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.btn {
+  cursor: pointer;
+  font-weight: 600;
+  border: none;
+  transition: var(--transition);
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: scale(1.01);
+}
+
+.btn-secondary {
+  background-color: #F2F4F6;
+  color: #4E5968;
+}
+
+.btn-secondary:hover {
+  background-color: #E5E8EB;
+}
+
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+/* Prompt Result Box */
+.prompt-result-container {
+  margin-top: 10px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+  animation: fadeIn 0.4s ease-out;
+}
+
+.instruction {
+  font-size: 13px;
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.code-box {
+  position: relative;
+  background: #1E1E1E;
+  border-radius: var(--input-radius);
+  padding: 20px;
+}
+
+pre {
+  color: #D4D4D4;
+  font-family: monospace;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+}
+
+.code-box .btn-copy {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* Config Grid */
+.controls-grid {
+  display: grid;
+  gap: 20px;
+  background: #F9FAFB;
+  padding: 20px;
+  border-radius: var(--input-radius);
+}
+
+.control-group input[type=range] {
+  width: 100%;
+  accent-color: var(--primary-color);
+  margin-top: 8px;
+}
+
+.help-text {
+  font-size: 13px;
+  color: var(--text-sub);
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Drag & Drop */
+.drop-zone {
+  border: 2px dashed var(--border-color);
+  border-radius: var(--input-radius);
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-sub);
+  background: #FAFAFB;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.drop-zone:hover, .drop-zone.dragover {
+  border-color: var(--primary-color);
+  background: #F0F4FD;
+  color: var(--primary-color);
+}
+
+.visualization-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.viz-title {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+canvas {
+  background: #fdfdfd;
+  border: 1px solid var(--border-color);
+  border-radius: var(--input-radius);
+  max-width: 100%;
+  height: auto;
+}
+
+.viz-actions {
+  margin-top: 16px;
+}
+
+/* Footer */
+.app-footer {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-sub);
+  font-size: 13px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
