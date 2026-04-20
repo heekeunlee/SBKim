@@ -145,11 +145,32 @@
           </div>
         </section>
 
-        <!-- Section 3: CSV Visualizer -->
+        <!-- Section 3: Live Simulator -->
+        <section id="live-sim-section" class="card">
+          <div class="card-header">
+            <h2>Step 3. 실시간 논문 로직 체험 (Interactive Sim)</h2>
+            <p>위의 슬라이더를 조절하면 AI 에이전트의 움직임이 즉시 변경됩니다. 논문의 로직을 미리 검증해보세요.</p>
+          </div>
+          <div class="card-body">
+            <div class="sim-canvas-container">
+              <canvas id="live-sim-canvas" width="600" height="300"></canvas>
+              <div class="sim-overlay">
+                <span id="sim-state-badge" class="badge">상태: 탐색 중</span>
+              </div>
+            </div>
+            <div class="viz-actions">
+              <button id="start-sim-btn" class="btn btn-primary">시뮬레이션 시작/재생</button>
+              <button id="reset-sim-btn" class="btn btn-secondary">초기화</button>
+              <a href="./cogarch_simulator.py" download class="btn btn-secondary" style="text-decoration: none;">🐍 파이썬 시뮬레이터 다운로드</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 4: CSV Visualizer -->
         <section id="visualizer-section" class="card">
           <div class="card-header">
-            <h2>Step 3. 결과 분석 시각화</h2>
-            <p>유니티에서 저장된 이동 경로(log.csv)를 올려 히트맵과 궤적을 확인하세요.</p>
+            <h2>Step 4. 결과 분석 시각화</h2>
+            <p>유니티(또는 파이썬)에서 저장된 이동 경로(log.csv)를 올려 히트맵과 궤적을 확인하세요.</p>
           </div>
           <div class="card-body">
             <div id="drop-zone" class="drop-zone">

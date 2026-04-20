@@ -312,6 +312,48 @@ canvas {
   display: block;
 }
 
+/* Simulator Styles */
+.sim-canvas-container {
+  position: relative;
+  width: 100%;
+  background: #F8F9FA;
+  border-radius: var(--input-radius);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+#live-sim-canvas {
+  display: block;
+  width: 100%;
+  height: 300px;
+  background: white;
+}
+
+.sim-overlay {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  pointer-events: none;
+}
+
+.badge {
+  background: var(--primary-color);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.viz-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
 /* Text heavy article styles */
 .article-style h3 {
   font-size: 18px;

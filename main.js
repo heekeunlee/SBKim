@@ -228,3 +228,101 @@ document.getElementById('reset-viz-btn').addEventListener('click', () => {
   vizContainer.classList.add('hidden');
   fileInput.value = '';
 });
+
+// ===== Module 4: Live Interactive Simulator (JS) =====
+const simCanvas = document.getElementById('live-sim-canvas');
+const simCtx = simCanvas.getContext('2d');
+const simStateBadge = document.getElementById('sim-state-badge');
+
+let simRunning = false;
+let simAgent = { x: 50, y: 150, history: [] };
+let simGoal = { x: 550, y: 150 };
+let simWalls = [
+  { x: 250, y: 0, w: 20, h: 200 },
+  { x: 400, y: 150, w: 20, h: 150 }
+];
+
+function drawSim() {
+  simCtx.clearRect(0, 0, simCanvas.width, simCanvas.height);
+  
+  // Draw Goal
+  simCtx.beginPath();
+  simCtx.arc(simGoal.x, simGoal.y, 10, 0, Math.PI*2);
+  simCtx.fillStyle = '#F44336';
+  simCtx.fill();
+  
+  // Draw Walls
+  simCtx.fillStyle = '#8B95A1';
+  simWalls.forEach(w => simCtx.fillRect(w.x, w.y, w.w, w.h));
+  
+  // Draw Hist
+  if (simAgent.history.length > 1) {
+    simCtx.beginPath();
+    simCtx.moveTo(simAgent.history[0].x, simAgent.history[0].y);
+    simAgent.history.forEach(p => simCtx.lineTo(p.x, p.y));
+    simCtx.strokeStyle = '#E5E8EB';
+    simCtx.stroke();
+  }
+  
+  // Draw Agent
+  simCtx.beginPath();
+  simCtx.arc(simAgent.x, simAgent.y, 8, 0, Math.PI*2);
+  simCtx.fillStyle = '#2D63E2';
+  simCtx.fill();
+}
+
+function updateSim() {
+  if (!simRunning) return;
+  
+  const speed = parseFloat(document.getElementById('input-speed').value) / 2;
+  const dx = simGoal.x - simAgent.x;
+  const dy = simGoal.y - simAgent.y;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  
+  if (dist < 10) {
+    simRunning = false;
+    simStateBadge.textContent = "상태: 목적지 도착";
+    simStateBadge.style.background = "#4CAF50";
+    return;
+  }
+  
+  // Cognitive Logic Mockup
+  let vx = (dx / dist) * speed;
+  let vy = (dy / dist) * speed;
+  
+  // Simple Wall Collision
+  simWalls.forEach(w => {
+    if (simAgent.x + vx > w.x && simAgent.x + vx < w.x + w.w &&
+        simAgent.y + vy > w.y && simAgent.y + vy < w.y + w.h) {
+      vx = 0; // Blocked
+      vy = speed; // Try to slide/find way (Direction Strategy)
+      simStateBadge.textContent = "상태: 장애물 회피 중 (방향 전략)";
+    }
+  });
+
+  simAgent.x += vx;
+  simAgent.y += vy;
+  simAgent.history.push({x: simAgent.x, y: simAgent.y});
+  
+  drawSim();
+  requestAnimationFrame(updateSim);
+}
+
+document.getElementById('start-sim-btn').addEventListener('click', () => {
+  simRunning = !simRunning;
+  if (simRunning) {
+    simStateBadge.textContent = "상태: 목적지 탐색 중";
+    simStateBadge.style.background = "#2D63E2";
+    updateSim();
+  }
+});
+
+document.getElementById('reset-sim-btn').addEventListener('click', () => {
+  simRunning = false;
+  simAgent = { x: 50, y: 150, history: [] };
+  simStateBadge.textContent = "상태: 대기 중";
+  simStateBadge.style.background = "#8B95A1";
+  drawSim();
+});
+
+drawSim();
