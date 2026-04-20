@@ -325,4 +325,27 @@ document.getElementById('reset-sim-btn').addEventListener('click', () => {
   drawSim();
 });
 
+document.getElementById('save-sim-csv-btn').addEventListener('click', () => {
+    if (simAgent.history.length === 0) {
+        alert("저장할 데이터가 없습니다. 시뮬레이션을 먼저 실행해주세요.");
+        return;
+    }
+
+    let csvContent = "Time,X,Y\n";
+    simAgent.history.forEach((p, index) => {
+        csvContent += `${(index * 0.1).toFixed(1)},${p.x.toFixed(2)},${p.y.toFixed(2)}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `live_sim_log_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    alert("CSV 파일이 저장되었습니다. 이제 '4. 노코드 도구' 탭의 분석기에서 이 파일을 확인해보세요!");
+});
+
 drawSim();
