@@ -1,3 +1,17 @@
+// ===== Tab Navigation Logic =====
+document.querySelectorAll('.tab-btn').forEach(button => {
+  button.addEventListener('click', () => {
+    // Remove active class from all buttons and content
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    
+    // Add active class to clicked button and target content
+    button.classList.add('active');
+    const targetId = button.getAttribute('data-target');
+    document.getElementById(targetId).classList.add('active');
+  });
+});
+
 // ===== Module 1: AI Prompt Master =====
 const prompts = {
   raycast: `안녕하세요 ChatGPT. 저는 현재 건축 관련 석사 재학 중이며, 코딩에 대한 경험이 전혀 없는 초보자입니다. 
