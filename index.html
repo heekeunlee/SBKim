@@ -332,9 +332,20 @@
               <p style="font-size: 14px; margin-bottom: 0;">건축 연구자가 유니티라는 복잡한 엔진을 배우기 전에, <strong>'자신의 가설(에이전트가 장애물을 어떻게 피할 것인가?)'을 즉시 시각적으로 확인</strong>할 수 있게 하는 것이 목표입니다. 이 시뮬레이터는 논문의 FSM(상태 머신) 로직을 그대로 따릅니다.</p>
             </div>
 
-            <h3>1. 실시간 시뮬레이터 (Live Sandbox)</h3>
-            <p>상단 [4. 노코드 도구] 탭의 슬라이더 설정을 그대로 반영합니다. 에이전트의 속도를 조절하며 실험해 보세요.</p>
-            
+            <h3>1. 실험 조건 설정 (Parameters)</h3>
+            <p>4번 탭의 데이터와 연동됩니다. 여기서 즉시 수치를 조절하여 실험을 개시할 수 있습니다.</p>
+            <div class="controls-grid" style="margin-bottom: 24px; background: #fff; border: 1px solid var(--border-color);">
+              <div class="control-group">
+                <label>이동 속도 (Speed): <span id="val-speed-sim">5</span></label>
+                <input type="range" id="input-speed-sim" min="1" max="15" value="5" step="0.5">
+              </div>
+              <div class="control-group">
+                <label>시야각 (FOV): <span id="val-fov-sim">120</span>°</label>
+                <input type="range" id="input-fov-sim" min="45" max="180" value="120" step="5">
+              </div>
+            </div>
+
+            <h3>2. 실시간 시뮬레이터 (Live Sandbox)</h3>
             <div class="sim-canvas-container" style="margin-bottom: 20px;">
               <canvas id="live-sim-canvas" width="600" height="300"></canvas>
               <div class="sim-overlay">
@@ -345,12 +356,23 @@
             <div class="viz-actions" style="margin-bottom: 40px;">
               <button id="start-sim-btn" class="btn btn-primary">▶ 시뮬레이션 시작/일시정지</button>
               <button id="reset-sim-btn" class="btn btn-secondary">🔄 초기화</button>
-              <button id="save-sim-csv-btn" class="btn btn-secondary" style="background: #E8F5E9; color: #2E7D32;">📂 현재 궤적 CSV 저장</button>
+              <button id="analyze-sim-btn" class="btn btn-primary" style="background: #6200EE;">📊 즉시 결과 분석 (Curve)</button>
+              <button id="save-sim-csv-btn" class="btn btn-secondary" style="background: #E8F5E9; color: #2E7D32;">📂 CSV 저장</button>
+            </div>
+
+            <div id="sim-analysis-area" class="hidden">
+              <hr style="border: none; border-top: 1px solid var(--border-color); margin: 40px 0;">
+              <h3>📈 실험 성과 분석 (Performance Curve)</h3>
+              <p>에이전트가 시간이 지남에 따라 목표 지점에 얼마나 근접했는지 보여주는 거리-시간 곡선입니다.</p>
+              <div class="chart-container" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);">
+                <canvas id="performance-chart" width="600" height="250"></canvas>
+              </div>
+              <p style="font-size: 13px; color: #666; margin-top: 10px; text-align: center;">기울기가 가파를수록 최단 경로(Shortest-path)에 가깝게 이동한 것을 의미합니다.</p>
             </div>
 
             <hr style="border: none; border-top: 1px solid var(--border-color); margin: 40px 0;">
 
-            <h3>2. 로컬 연구용 파이썬 시뮬레이터</h3>
+            <h3>3. 로컬 연구용 파이썬 시뮬레이터</h3>
             <p>브라우저 환경의 한계를 넘어, 실제 연구 논문용 데이터를 대량으로 뽑아낼 수 있는 파이썬 소스코드를 제공합니다.</p>
             <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
               <div>
@@ -363,10 +385,10 @@
             <div style="margin-top: 40px;">
               <h3>💡 활용 방법 가이드</h3>
               <ul style="font-size: 14px;">
-                <li><strong>실험 설계:</strong> [노코드 도구] 탭에서 원하는 속도와 시야각을 설정합니다.</li>
-                <li><strong>시뮬레이션:</strong> 이곳에서 '시작' 버튼을 눌러 에이전트가 장애물(회색 벽)을 어떻게 회피하여 목적지(빨간 원)로 가는지 관찰합니다.</li>
-                <li><strong>데이터 수집:</strong> 'CSV 저장' 버튼을 누르면 지금까지 움직인 모든 좌표가 엑셀 파일로 다운로드됩니다.</li>
-                <li><strong>결과 검증:</strong> 다운로드된 CSV를 [4. 노코드 도구] 탭의 [Step 3. 결과 분석 시각화] 섹션에 넣어 정밀 분석(히트맵 등)에 활용할 수 있습니다.</li>
+                <li><strong>파라미터 조절:</strong> 상단 슬라이더로 에이전트의 스펙을 즉시 변경할 수 있습니다.</li>
+                <li><strong>시뮬레이션:</strong> 장애물을 피해 목적지로 가는 인지 로직을 관찰합니다.</li>
+                <li><strong>시각화 버튼:</strong> 실험 종료 후 '즉시 결과 분석'을 누르면 커브 그래프가 하단에 생성됩니다.</li>
+                <li><strong>CSV 활용:</strong> 'CSV 저장' 버튼을 누르면 이 데이터를 외부 분석 도구로 가져갈 수 있습니다.</li>
               </ul>
             </div>
           </div>

@@ -234,6 +234,27 @@ const simCanvas = document.getElementById('live-sim-canvas');
 const simCtx = simCanvas.getContext('2d');
 const simStateBadge = document.getElementById('sim-state-badge');
 
+// Sync Sliders between Tab 4 and Tab 6
+const syncSliders = (id1, id2, val1, val2) => {
+    const s1 = document.getElementById(id1);
+    const s2 = document.getElementById(id2);
+    const v1 = document.getElementById(val1);
+    const v2 = document.getElementById(val2);
+
+    const update = (val) => {
+        s1.value = val;
+        s2.value = val;
+        v1.textContent = val;
+        v2.textContent = val;
+    };
+
+    s1.addEventListener('input', (e) => update(e.target.value));
+    s2.addEventListener('input', (e) => update(e.target.value));
+};
+
+syncSliders('input-speed', 'input-speed-sim', 'val-speed', 'val-speed-sim');
+syncSliders('input-fov', 'input-fov-sim', 'val-fov', 'val-fov-sim');
+
 let simRunning = false;
 let simAgent = { x: 50, y: 150, history: [] };
 let simGoal = { x: 550, y: 150 };
@@ -261,6 +282,7 @@ function drawSim() {
     simCtx.moveTo(simAgent.history[0].x, simAgent.history[0].y);
     simAgent.history.forEach(p => simCtx.lineTo(p.x, p.y));
     simCtx.strokeStyle = '#E5E8EB';
+    simCtx.lineWidth = 1.5;
     simCtx.stroke();
   }
   
@@ -274,7 +296,7 @@ function drawSim() {
 function updateSim() {
   if (!simRunning) return;
   
-  const speed = parseFloat(document.getElementById('input-speed').value) / 2;
+  const speed = parseFloat(document.getElementById('input-speed-sim').value) / 2;
   const dx = simGoal.x - simAgent.x;
   const dy = simGoal.y - simAgent.y;
   const dist = Math.sqrt(dx*dx + dy*dy);
@@ -302,10 +324,65 @@ function updateSim() {
 
   simAgent.x += vx;
   simAgent.y += vy;
-  simAgent.history.push({x: simAgent.x, y: simAgent.y});
+  simAgent.history.push({x: simAgent.x, y: simAgent.y, dist: dist});
   
   drawSim();
   requestAnimationFrame(updateSim);
+}
+
+// Chart Drawing Logic
+function drawPerformanceChart() {
+    const chartArea = document.getElementById('sim-analysis-area');
+    chartArea.classList.remove('hidden');
+
+    const chartCanvas = document.getElementById('performance-chart');
+    const c = chartCanvas.getContext('2d');
+    const data = simAgent.history;
+
+    if (data.length < 2) return;
+
+    c.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+    
+    const padding = 40;
+    const w = chartCanvas.width - padding * 2;
+    const h = chartCanvas.height - padding * 2;
+
+    const maxDist = Math.max(...data.map(d => d.dist));
+    const stepX = w / data.length;
+
+    // Draw Axes
+    c.beginPath();
+    c.moveTo(padding, padding);
+    c.lineTo(padding, h + padding);
+    c.lineTo(w + padding, h + padding);
+    c.strokeStyle = '#999';
+    c.stroke();
+
+    // Draw Labels
+    c.fillStyle = '#666';
+    c.font = '10px Arial';
+    c.fillText("Distance to Goal", padding - 35, padding - 10);
+    c.fillText("Time (steps)", w + padding - 20, h + padding + 15);
+
+    // Draw Curve
+    c.beginPath();
+    data.forEach((p, i) => {
+        const x = padding + i * stepX;
+        const y = padding + (h - (p.dist / maxDist) * h);
+        if (i === 0) c.moveTo(x, y);
+        else c.lineTo(x, y);
+    });
+    
+    c.strokeStyle = '#6200EE';
+    c.lineWidth = 3;
+    c.lineJoin = 'round';
+    c.stroke();
+
+    // Fill area
+    c.lineTo(padding + (data.length-1) * stepX, h + padding);
+    c.lineTo(padding, h + padding);
+    c.fillStyle = 'rgba(98, 0, 238, 0.1)';
+    c.fill();
 }
 
 document.getElementById('start-sim-btn').addEventListener('click', () => {
@@ -322,7 +399,12 @@ document.getElementById('reset-sim-btn').addEventListener('click', () => {
   simAgent = { x: 50, y: 150, history: [] };
   simStateBadge.textContent = "상태: 대기 중";
   simStateBadge.style.background = "#8B95A1";
+  document.getElementById('sim-analysis-area').classList.add('hidden');
   drawSim();
+});
+
+document.getElementById('analyze-sim-btn').addEventListener('click', () => {
+    drawPerformanceChart();
 });
 
 document.getElementById('save-sim-csv-btn').addEventListener('click', () => {
@@ -331,21 +413,19 @@ document.getElementById('save-sim-csv-btn').addEventListener('click', () => {
         return;
     }
 
-    let csvContent = "Time,X,Y\n";
+    let csvContent = "Time,X,Y,Distance\n";
     simAgent.history.forEach((p, index) => {
-        csvContent += `${(index * 0.1).toFixed(1)},${p.x.toFixed(2)},${p.y.toFixed(2)}\n`;
+        csvContent += `${(index * 0.1).toFixed(1)},${p.x.toFixed(2)},${p.y.toFixed(2)},${(p.dist || 0).toFixed(2)}\n`;
     });
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `live_sim_log_${new Date().getTime()}.csv`);
+    link.setAttribute("download", `cogarch_sim_result_${new Date().getTime()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
-    alert("CSV 파일이 저장되었습니다. 이제 '4. 노코드 도구' 탭의 분석기에서 이 파일을 확인해보세요!");
 });
 
 drawSim();
