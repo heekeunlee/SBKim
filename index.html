@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/SBKim/assets/index-oZauvlCw.js"></script>
+    <script type="module" crossorigin src="/SBKim/assets/index-B8MINpkb.js"></script>
     <link rel="stylesheet" crossorigin href="/SBKim/assets/index-ctaJyEwY.css">
   </head>
   <body>
@@ -26,6 +26,7 @@
         <button class="tab-btn" data-target="tab-2">3. 해결 가이드</button>
         <button class="tab-btn" data-target="tab-3">4. 노코드 도구</button>
         <button class="tab-btn" data-target="tab-4">5. 용어 정리</button>
+        <button class="tab-btn" data-target="tab-6">6. 실전 시뮬레이션</button>
       </nav>
 
       <!-- Tab 1: AI 분석 결과 -->
@@ -146,32 +147,13 @@
           </div>
         </section>
 
-        <!-- Section 3: Live Simulator -->
-        <section id="live-sim-section" class="card">
-          <div class="card-header">
-            <h2>Step 3. 실시간 논문 로직 체험 (Interactive Sim)</h2>
-            <p>위의 슬라이더를 조절하면 AI 에이전트의 움직임이 즉시 변경됩니다. 논문의 로직을 미리 검증해보세요.</p>
-          </div>
-          <div class="card-body">
-            <div class="sim-canvas-container">
-              <canvas id="live-sim-canvas" width="600" height="300"></canvas>
-              <div class="sim-overlay">
-                <span id="sim-state-badge" class="badge">상태: 탐색 중</span>
-              </div>
-            </div>
-            <div class="viz-actions">
-              <button id="start-sim-btn" class="btn btn-primary">시뮬레이션 시작/재생</button>
-              <button id="reset-sim-btn" class="btn btn-secondary">초기화</button>
-              <a href="./cogarch_simulator.py" download class="btn btn-secondary" style="text-decoration: none;">🐍 파이썬 시뮬레이터 다운로드</a>
-            </div>
-          </div>
-        </section>
+
 
         <!-- Section 4: CSV Visualizer -->
         <section id="visualizer-section" class="card">
           <div class="card-header">
-            <h2>Step 4. 결과 분석 시각화</h2>
-            <p>유니티(또는 파이썬)에서 저장된 이동 경로(log.csv)를 올려 히트맵과 궤적을 확인하세요.</p>
+            <h2>Step 3. 결과 분석 시각화</h2>
+            <p>유니티(Unity) 프로젝트에서 수행된 실험 결과 CSV 파일을 올려 히트맵과 궤적을 확인하세요.</p>
           </div>
           <div class="card-body">
             <div id="drop-zone" class="drop-zone">
@@ -300,7 +282,60 @@
             </div>
           </div>
         </div>
+      <!-- Tab 6: 실전 시뮬레이션 -->
+      <div id="tab-6" class="tab-content fade-in">
+        <div class="card">
+          <div class="card-header">
+            <h2>🧪 인지 에이전트 실전 시뮬레이션 대시보드</h2>
+            <p>논문에 제시된 핵심 로직을 실제 코드로 구현하여 즉각적인 실험이 가능하도록 구축했습니다.</p>
+          </div>
+          <div class="card-body article-style">
+            <div style="background: #F0F4FD; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #DDE4FF;">
+              <h4 style="margin-top: 0;">🎯 제작 의도</h4>
+              <p style="font-size: 14px; margin-bottom: 0;">건축 연구자가 유니티라는 복잡한 엔진을 배우기 전에, <strong>'자신의 가설(에이전트가 장애물을 어떻게 피할 것인가?)'을 즉시 시각적으로 확인</strong>할 수 있게 하는 것이 목표입니다. 이 시뮬레이터는 논문의 FSM(상태 머신) 로직을 그대로 따릅니다.</p>
+            </div>
+
+            <h3>1. 실시간 시뮬레이터 (Live Sandbox)</h3>
+            <p>상단 [4. 노코드 도구] 탭의 슬라이더 설정을 그대로 반영합니다. 에이전트의 속도를 조절하며 실험해 보세요.</p>
+            
+            <div class="sim-canvas-container" style="margin-bottom: 20px;">
+              <canvas id="live-sim-canvas" width="600" height="300"></canvas>
+              <div class="sim-overlay">
+                <span id="sim-state-badge" class="badge">상태: 대기 중</span>
+              </div>
+            </div>
+
+            <div class="viz-actions" style="margin-bottom: 40px;">
+              <button id="start-sim-btn" class="btn btn-primary">▶ 시뮬레이션 시작/일시정지</button>
+              <button id="reset-sim-btn" class="btn btn-secondary">🔄 초기화</button>
+              <button id="save-sim-csv-btn" class="btn btn-secondary" style="background: #E8F5E9; color: #2E7D32;">📂 현재 궤적 CSV 저장</button>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 40px 0;">
+
+            <h3>2. 로컬 연구용 파이썬 시뮬레이터</h3>
+            <p>브라우저 환경의 한계를 넘어, 실제 연구 논문용 데이터를 대량으로 뽑아낼 수 있는 파이썬 소스코드를 제공합니다.</p>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <h4 style="margin: 0;">cogarch_simulator.py</h4>
+                <p style="margin: 5px 0 0; font-size: 13px; color: #666;">Pygame 기반 / CSV 로깅 기능 포함 / 논문 로직 완벽 구현</p>
+              </div>
+              <a href="./cogarch_simulator.py" download class="btn btn-primary">🐍 스크립트 다운로드</a>
+            </div>
+
+            <div style="margin-top: 40px;">
+              <h3>💡 활용 방법 가이드</h3>
+              <ul style="font-size: 14px;">
+                <li><strong>실험 설계:</strong> [노코드 도구] 탭에서 원하는 속도와 시야각을 설정합니다.</li>
+                <li><strong>시뮬레이션:</strong> 이곳에서 '시작' 버튼을 눌러 에이전트가 장애물(회색 벽)을 어떻게 회피하여 목적지(빨간 원)로 가는지 관찰합니다.</li>
+                <li><strong>데이터 수집:</strong> 'CSV 저장' 버튼을 누르면 지금까지 움직인 모든 좌표가 엑셀 파일로 다운로드됩니다.</li>
+                <li><strong>결과 검증:</strong> 다운로드된 CSV를 [4. 노코드 도구] 탭의 [Step 3. 결과 분석 시각화] 섹션에 넣어 정밀 분석(히트맵 등)에 활용할 수 있습니다.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
+
       <!-- Tab 5: 핵심 논문 해설 -->
       <div id="tab-5" class="tab-content fade-in">
         <div class="card">
