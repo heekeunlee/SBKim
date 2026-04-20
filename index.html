@@ -7,8 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/SBKim/assets/index-CL_-i3HU.js"></script>
-    <link rel="stylesheet" crossorigin href="/SBKim/assets/index-ctaJyEwY.css">
+    <script type="module" crossorigin src="/SBKim/assets/index-Dw3v5q8r.js"></script>
+    <link rel="stylesheet" crossorigin href="/SBKim/assets/index-DaV6IxFT.css">
   </head>
   <body>
     <header class="app-header">
@@ -333,16 +333,60 @@
               <p style="font-size: 14px; margin-bottom: 0;">건축 연구자가 유니티라는 복잡한 엔진을 배우기 전에, <strong>'자신의 가설(에이전트가 장애물을 어떻게 피할 것인가?)'을 즉시 시각적으로 확인</strong>할 수 있게 하는 것이 목표입니다. 이 시뮬레이터는 논문의 FSM(상태 머신) 로직을 그대로 따릅니다.</p>
             </div>
 
-            <h3>1. 실험 조건 설정 (Parameters)</h3>
-            <p>4번 탭의 데이터와 연동됩니다. 여기서 즉시 수치를 조절하여 실험을 개시할 수 있습니다.</p>
-            <div class="controls-grid" style="margin-bottom: 24px; background: #fff; border: 1px solid var(--border-color);">
-              <div class="control-group">
-                <label>이동 속도 (Speed): <span id="val-speed-sim">5</span></label>
-                <input type="range" id="input-speed-sim" min="1" max="15" value="5" step="0.5">
+            <h3>1. 시뮬레이션 환경 설정 (Configuration)</h3>
+            <p>에이전트의 물리적/인지적 특성을 세부 조정합니다. (4번 탭과 실시간 동기화)</p>
+            
+            <div class="inner-tabs" style="margin-bottom: 24px;">
+              <div class="inner-tab-nav">
+                <button class="inner-tab-btn active" data-inner-tab="sim-settings-phys">🏃‍♂️ 핵심 & 물리 (Core)</button>
+                <button class="inner-tab-btn" data-inner-tab="sim-settings-cog">🧠 인지 전략 (Cognitive)</button>
+                <button class="inner-tab-btn" data-inner-tab="sim-settings-env">🌐 환경 변수 (Environment)</button>
               </div>
-              <div class="control-group">
-                <label>시야각 (FOV): <span id="val-fov-sim">120</span>°</label>
-                <input type="range" id="input-fov-sim" min="45" max="180" value="120" step="5">
+              
+              <div id="sim-settings-phys" class="inner-tab-content active">
+                <div class="controls-grid" style="background: #fff; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 12px 12px;">
+                  <div class="control-group">
+                    <label>이동 속도 (Speed): <span id="val-speed-sim">5</span></label>
+                    <input type="range" id="input-speed-sim" min="1" max="15" value="5" step="0.5">
+                  </div>
+                  <div class="control-group">
+                    <label>기억 한도 (Memory): <span id="val-memory-sim">10</span>개</label>
+                    <input type="range" id="input-memory-sim" min="1" max="50" value="10" step="1">
+                  </div>
+                  <div class="control-group">
+                    <label>회전 속도 (Rotation): <span id="val-rot-sim">3</span></label>
+                    <input type="range" id="input-rot-sim" min="1" max="10" value="3" step="0.5">
+                  </div>
+                </div>
+              </div>
+
+              <div id="sim-settings-cog" class="inner-tab-content">
+                <div class="controls-grid" style="background: #fff; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 12px 12px;">
+                  <div class="control-group">
+                    <label>시야각 (FOV): <span id="val-fov-sim">120</span>°</label>
+                    <input type="range" id="input-fov-sim" min="45" max="180" value="120" step="5">
+                  </div>
+                  <div class="control-group">
+                    <label>탐색 알고리즘: <span id="val-algo-sim">인지(Cognitive)</span></label>
+                    <select id="input-algo-sim" class="form-select" style="margin-top: 5px;">
+                      <option value="cog">인간 기반 인지 (Cognitive)</option>
+                      <option value="shortest">기계 기반 최단경로 (A*)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div id="sim-settings-env" class="inner-tab-content">
+                <div class="controls-grid" style="background: #fff; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 12px 12px;">
+                  <div class="control-group">
+                    <label>장애물 복잡도: <span id="val-obs-sim">보통</span></label>
+                    <input type="range" id="input-obs-sim" min="1" max="3" value="2" step="1">
+                  </div>
+                  <div class="control-group">
+                    <label>목표물 유인력: <span id="val-attract-sim">높음</span></label>
+                    <input type="range" id="input-attract-sim" min="1" max="5" value="4" step="1">
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -354,21 +398,45 @@
               </div>
             </div>
 
-            <div class="viz-actions" style="margin-bottom: 40px;">
-              <button id="start-sim-btn" class="btn btn-primary">▶ 시뮬레이션 시작/일시정지</button>
-              <button id="reset-sim-btn" class="btn btn-secondary">🔄 초기화</button>
-              <button id="analyze-sim-btn" class="btn btn-primary" style="background: #6200EE;">📊 즉시 결과 분석 (Curve)</button>
-              <button id="save-sim-csv-btn" class="btn btn-secondary" style="background: #E8F5E9; color: #2E7D32;">📂 CSV 저장</button>
+            <div class="viz-actions" style="margin-bottom: 40px; display: flex; gap: 10px; flex-wrap: wrap;">
+              <button id="start-sim-btn" class="btn btn-primary" style="flex: 2;">▶ 시뮬레이션 시작/일시정지</button>
+              <button id="reset-sim-btn" class="btn btn-secondary" style="flex: 1;">🔄 초기화</button>
+              <button id="analyze-sim-btn" class="btn btn-primary" style="background: #6200EE; flex: 2;">📊 결과 누적 시각화 (Comparison)</button>
+              <button id="clear-analysis-btn" class="btn btn-secondary" style="background: #FFF0F0; color: #D32F2F; flex: 1;">🗑 분석 초기화</button>
+              <button id="save-sim-csv-btn" class="btn btn-secondary" style="background: #E8F5E9; color: #2E7D32; flex: 1;">📂 CSV 저장</button>
+              <button id="load-sim-csv-btn" class="btn btn-secondary" style="background: #FFF8E1; color: #F57F17; flex: 1;">📂 CSV 불러오기</button>
+              <input type="file" id="sim-csv-input" accept=".csv" class="hidden">
             </div>
 
             <div id="sim-analysis-area" class="hidden">
               <hr style="border: none; border-top: 1px solid var(--border-color); margin: 40px 0;">
-              <h3>📈 실험 성과 분석 (Performance Curve)</h3>
-              <p>에이전트가 시간이 지남에 따라 목표 지점에 얼마나 근접했는지 보여주는 거리-시간 곡선입니다.</p>
-              <div class="chart-container" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);">
-                <canvas id="performance-chart" width="600" height="250"></canvas>
+              <h3>📈 다차원 실험 성과 분석 (Multi-angle Analysis)</h3>
+              <p>시뮬레이션 결과가 즉시 두 가지 차트로 시각화됩니다.</p>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                <div class="chart-card">
+                  <h4>평균 접근 효율 곡선</h4>
+                  <div class="chart-container" style="background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); position: relative;">
+                    <canvas id="performance-chart" width="300" height="200"></canvas>
+                  </div>
+                  <p class="chart-desc">목표 지점과의 거리 변화 추이</p>
+                </div>
+                
+                <div class="chart-card">
+                  <h4>공간 이동 평면 궤적</h4>
+                  <div class="chart-container" style="background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);">
+                    <canvas id="trajectory-chart" width="300" height="200"></canvas>
+                  </div>
+                  <p class="chart-desc">에전트별 이동 경로 분석</p>
+                </div>
               </div>
-              <p style="font-size: 13px; color: #666; margin-top: 10px; text-align: center;">기울기가 가파를수록 최단 경로(Shortest-path)에 가깝게 이동한 것을 의미합니다.</p>
+
+              <div id="comparison-legend" class="comparison-legend" style="margin-top: 20px; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);">
+                <h5 style="margin: 0 0 10px 0;">📍 실험 대조군 목록 (Legend)</h5>
+                <div id="legend-items" style="display: flex; flex-direction: column; gap: 8px;">
+                  <!-- Legend items will be injected here -->
+                </div>
+              </div>
             </div>
 
             <hr style="border: none; border-top: 1px solid var(--border-color); margin: 40px 0;">
