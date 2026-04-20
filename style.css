@@ -157,6 +157,69 @@ label {
   border-top: 1px solid var(--border-color);
   animation: fadeIn 0.4s ease-out;
 }
+/* Inner Tabs for Simulator Settings */
+.inner-tabs {
+  margin-top: 1rem;
+}
+
+.inner-tab-nav {
+  display: flex;
+  background: #f1f3f5;
+  border-radius: 12px 12px 0 0;
+  padding: 5px;
+  border: 1px solid var(--border-color);
+  border-bottom: none;
+}
+
+.inner-tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.inner-tab-btn.active {
+  background: #fff;
+  color: var(--primary-color);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.inner-tab-content {
+  display: none;
+}
+
+.inner-tab-content.active {
+  display: block;
+}
+
+.chart-card h4 {
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  color: #333;
+  text-align: center;
+}
+
+.chart-desc {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #8B95A1;
+  color: white;
+}
 
 .instruction {
   font-size: 13px;

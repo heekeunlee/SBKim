@@ -12,6 +12,22 @@ document.querySelectorAll('.tab-btn').forEach(button => {
   });
 });
 
+// ===== Inner Tab Logic (Nested Tabs) =====
+function initInnerTabs() {
+  document.querySelectorAll('.inner-tab-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      const parent = button.closest('.inner-tabs');
+      parent.querySelectorAll('.inner-tab-btn').forEach(btn => btn.classList.remove('active'));
+      parent.querySelectorAll('.inner-tab-content').forEach(content => content.classList.remove('active'));
+      
+      button.classList.add('active');
+      const targetId = button.getAttribute('data-inner-tab');
+      document.getElementById(targetId).classList.add('active');
+    });
+  });
+}
+initInnerTabs();
+
 // ===== Module 1: AI Prompt Master =====
 const prompts = {
   raycast: `안녕하세요 ChatGPT. 저는 현재 건축 관련 석사 재학 중이며, 코딩에 대한 경험이 전혀 없는 초보자입니다. 
@@ -76,14 +92,20 @@ document.getElementById('copy-prompt-btn').addEventListener('click', () => {
 
 // ===== Module 2: Parameter Configurator =====
 const updateVal = (id, valId) => {
-  document.getElementById(id).addEventListener('input', (e) => {
-    document.getElementById(valId).textContent = e.target.value;
-  });
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', (e) => {
+      document.getElementById(valId).textContent = e.target.value;
+    });
+  }
 };
 
 updateVal('input-speed', 'val-speed');
 updateVal('input-fov', 'val-fov');
 updateVal('input-memory', 'val-memory');
+updateVal('input-rot-sim', 'val-rot-sim');
+updateVal('input-obs-sim', 'val-obs-sim');
+updateVal('input-attract-sim', 'val-attract-sim');
 
 document.getElementById('download-config-btn').addEventListener('click', () => {
   const config = {
@@ -151,14 +173,11 @@ function parseAndDraw(csvText) {
   const lines = csvText.split('\n').filter(line => line.trim() !== '');
   if (lines.length < 2) return;
   
-  // Try to find X, Y, Z columns
   const header = lines[0].toLowerCase().split(',');
   const xIdx = header.findIndex(h => h.includes('x'));
-  // In Unity, Z is forward/backward map coordinate, Y is up (height)
   const zIdx = header.findIndex(h => h.includes('z') || h.includes('y')); 
   
   if (xIdx === -1 || zIdx === -1) {
-    // Fallback: assume column 1 is X and 2 is Z
     drawTrajectory(lines.slice(1).map(l => {
       const p = l.split(',');
       return {x: parseFloat(p[1]||0), z: parseFloat(p[2]||0)};
@@ -173,13 +192,9 @@ function parseAndDraw(csvText) {
 
 function drawTrajectory(points) {
   vizContainer.classList.remove('hidden');
-  
-  // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
   if(points.length === 0) return;
   
-  // Find min/max for normalization
   let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
   points.forEach(p => {
     if (p.x < minX) minX = p.x;
@@ -188,40 +203,24 @@ function drawTrajectory(points) {
     if (p.z > maxZ) maxZ = p.z;
   });
   
-  // Add padding
   const padding = 40;
   const rangeX = (maxX - minX) || 1;
   const rangeZ = (maxZ - minZ) || 1;
-  
-  // Scale function
   const scaleX = x => padding + ((x - minX) / rangeX) * (canvas.width - padding * 2);
-  const scaleZ = z => canvas.height - (padding + ((z - minZ) / rangeZ) * (canvas.height - padding * 2)); // Invert Z for screen coords
+  const scaleZ = z => canvas.height - (padding + ((z - minZ) / rangeZ) * (canvas.height - padding * 2));
   
-  // Draw path
   ctx.beginPath();
   ctx.moveTo(scaleX(points[0].x), scaleZ(points[0].z));
-  
   for(let i=1; i<points.length; i++) {
     ctx.lineTo(scaleX(points[i].x), scaleZ(points[i].z));
   }
-  
   ctx.strokeStyle = '#2D63E2';
   ctx.lineWidth = 2;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
   ctx.stroke();
-  
-  // Draw start/end markers
-  ctx.beginPath();
-  ctx.arc(scaleX(points[0].x), scaleZ(points[0].z), 6, 0, Math.PI*2);
-  ctx.fillStyle = '#4CAF50'; // Start = Green
-  ctx.fill();
-  
+
+  ctx.beginPath(); ctx.arc(scaleX(points[0].x), scaleZ(points[0].z), 6, 0, Math.PI*2); ctx.fillStyle = '#4CAF50'; ctx.fill();
   const last = points[points.length-1];
-  ctx.beginPath();
-  ctx.arc(scaleX(last.x), scaleZ(last.z), 6, 0, Math.PI*2);
-  ctx.fillStyle = '#F44336'; // End = Red
-  ctx.fill();
+  ctx.beginPath(); ctx.arc(scaleX(last.x), scaleZ(last.z), 6, 0, Math.PI*2); ctx.fillStyle = '#F44336'; ctx.fill();
 }
 
 document.getElementById('reset-viz-btn').addEventListener('click', () => {
@@ -234,7 +233,6 @@ const simCanvas = document.getElementById('live-sim-canvas');
 const simCtx = simCanvas.getContext('2d');
 const simStateBadge = document.getElementById('sim-state-badge');
 
-// Sync Sliders between Tab 4 and Tab 6
 const syncSliders = (id1, id2, val1, val2) => {
     const s1 = document.getElementById(id1);
     const s2 = document.getElementById(id2);
@@ -254,6 +252,7 @@ const syncSliders = (id1, id2, val1, val2) => {
 
 syncSliders('input-speed', 'input-speed-sim', 'val-speed', 'val-speed-sim');
 syncSliders('input-fov', 'input-fov-sim', 'val-fov', 'val-fov-sim');
+syncSliders('input-memory', 'input-memory-sim', 'val-memory', 'val-memory-sim');
 
 let simRunning = false;
 let simAgent = { x: 50, y: 150, history: [] };
@@ -263,20 +262,13 @@ let simWalls = [
   { x: 400, y: 150, w: 20, h: 150 }
 ];
 
+let allSimRuns = [];
+const colorPalette = ['#6200EE', '#03DAC6', '#FF0266', '#FFDE03', '#03A9F4', '#4CAF50', '#FF9800'];
+
 function drawSim() {
   simCtx.clearRect(0, 0, simCanvas.width, simCanvas.height);
-  
-  // Draw Goal
-  simCtx.beginPath();
-  simCtx.arc(simGoal.x, simGoal.y, 10, 0, Math.PI*2);
-  simCtx.fillStyle = '#F44336';
-  simCtx.fill();
-  
-  // Draw Walls
-  simCtx.fillStyle = '#8B95A1';
-  simWalls.forEach(w => simCtx.fillRect(w.x, w.y, w.w, w.h));
-  
-  // Draw Hist
+  simCtx.beginPath(); simCtx.arc(simGoal.x, simGoal.y, 10, 0, Math.PI*2); simCtx.fillStyle = '#F44336'; simCtx.fill();
+  simCtx.fillStyle = '#8B95A1'; simWalls.forEach(w => simCtx.fillRect(w.x, w.y, w.w, w.h));
   if (simAgent.history.length > 1) {
     simCtx.beginPath();
     simCtx.moveTo(simAgent.history[0].x, simAgent.history[0].y);
@@ -285,105 +277,104 @@ function drawSim() {
     simCtx.lineWidth = 1.5;
     simCtx.stroke();
   }
-  
-  // Draw Agent
-  simCtx.beginPath();
-  simCtx.arc(simAgent.x, simAgent.y, 8, 0, Math.PI*2);
-  simCtx.fillStyle = '#2D63E2';
-  simCtx.fill();
+  simCtx.beginPath(); simCtx.arc(simAgent.x, simAgent.y, 8, 0, Math.PI*2); simCtx.fillStyle = '#2D63E2'; simCtx.fill();
 }
 
 function updateSim() {
   if (!simRunning) return;
-  
   const speed = parseFloat(document.getElementById('input-speed-sim').value) / 2;
   const dx = simGoal.x - simAgent.x;
   const dy = simGoal.y - simAgent.y;
   const dist = Math.sqrt(dx*dx + dy*dy);
-  
   if (dist < 10) {
     simRunning = false;
     simStateBadge.textContent = "상태: 목적지 도착";
     simStateBadge.style.background = "#4CAF50";
     return;
   }
-  
-  // Cognitive Logic Mockup
   let vx = (dx / dist) * speed;
   let vy = (dy / dist) * speed;
-  
-  // Simple Wall Collision
   simWalls.forEach(w => {
     if (simAgent.x + vx > w.x && simAgent.x + vx < w.x + w.w &&
         simAgent.y + vy > w.y && simAgent.y + vy < w.y + w.h) {
-      vx = 0; // Blocked
-      vy = speed; // Try to slide/find way (Direction Strategy)
-      simStateBadge.textContent = "상태: 장애물 회피 중 (방향 전략)";
+      vx = 0; vy = speed; simStateBadge.textContent = "상태: 장애물 회피 중 (방향 전략)";
     }
   });
-
-  simAgent.x += vx;
-  simAgent.y += vy;
+  simAgent.x += vx; simAgent.y += vy;
   simAgent.history.push({x: simAgent.x, y: simAgent.y, dist: dist});
-  
   drawSim();
   requestAnimationFrame(updateSim);
 }
 
-// Chart Drawing Logic
-function drawPerformanceChart() {
+function drawCharts() {
     const chartArea = document.getElementById('sim-analysis-area');
     chartArea.classList.remove('hidden');
-
-    const chartCanvas = document.getElementById('performance-chart');
-    const c = chartCanvas.getContext('2d');
-    const data = simAgent.history;
-
-    if (data.length < 2) return;
-
-    c.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
-    
-    const padding = 40;
-    const w = chartCanvas.width - padding * 2;
-    const h = chartCanvas.height - padding * 2;
-
-    const maxDist = Math.max(...data.map(d => d.dist));
-    const stepX = w / data.length;
-
-    // Draw Axes
-    c.beginPath();
-    c.moveTo(padding, padding);
-    c.lineTo(padding, h + padding);
-    c.lineTo(w + padding, h + padding);
-    c.strokeStyle = '#999';
-    c.stroke();
-
-    // Draw Labels
-    c.fillStyle = '#666';
-    c.font = '10px Arial';
-    c.fillText("Distance to Goal", padding - 35, padding - 10);
-    c.fillText("Time (steps)", w + padding - 20, h + padding + 15);
-
-    // Draw Curve
-    c.beginPath();
-    data.forEach((p, i) => {
-        const x = padding + i * stepX;
-        const y = padding + (h - (p.dist / maxDist) * h);
-        if (i === 0) c.moveTo(x, y);
-        else c.lineTo(x, y);
+    if (simAgent.history.length > 1) {
+        const currentParams = {
+            speed: document.getElementById('input-speed-sim').value,
+            fov: document.getElementById('input-fov-sim').value,
+            memory: document.getElementById('input-memory-sim').value,
+            timestamp: new Date().toLocaleTimeString()
+        };
+        if (allSimRuns.length === 0 || allSimRuns[allSimRuns.length-1].data !== simAgent.history) {
+            allSimRuns.push({
+                data: JSON.parse(JSON.stringify(simAgent.history)),
+                params: currentParams,
+                color: colorPalette[allSimRuns.length % colorPalette.length]
+            });
+        }
+    }
+    if (allSimRuns.length === 0) return;
+    updateLegend();
+    const perfCanvas = document.getElementById('performance-chart');
+    const pc = perfCanvas.getContext('2d');
+    pc.clearRect(0, 0, perfCanvas.width, perfCanvas.height);
+    const padding = 30;
+    const pw = perfCanvas.width - padding * 2;
+    const ph = perfCanvas.height - padding * 2;
+    pc.beginPath(); pc.moveTo(padding, padding); pc.lineTo(padding, ph + padding); pc.lineTo(pw + padding, ph + padding); pc.strokeStyle = '#ADB5BD'; pc.stroke();
+    let maxLen = Math.max(...allSimRuns.map(r => r.data.length));
+    let overallMaxDist = Math.max(...allSimRuns.map(r => Math.max(...r.data.map(d => d.dist || 0)))) || 1;
+    allSimRuns.forEach(run => {
+        const stepX = pw / (maxLen - 1);
+        pc.beginPath();
+        run.data.forEach((p, i) => {
+            const x = padding + i * stepX;
+            const y = padding + (ph - (p.dist / overallMaxDist) * ph);
+            if (i === 0) pc.moveTo(x, y); else pc.lineTo(x, y);
+        });
+        pc.strokeStyle = run.color; pc.lineWidth = 2; pc.stroke();
     });
-    
-    c.strokeStyle = '#6200EE';
-    c.lineWidth = 3;
-    c.lineJoin = 'round';
-    c.stroke();
-
-    // Fill area
-    c.lineTo(padding + (data.length-1) * stepX, h + padding);
-    c.lineTo(padding, h + padding);
-    c.fillStyle = 'rgba(98, 0, 238, 0.1)';
-    c.fill();
+    const trajCanvas = document.getElementById('trajectory-chart');
+    const tc = trajCanvas.getContext('2d');
+    tc.clearRect(0, 0, trajCanvas.width, trajCanvas.height);
+    const tw = trajCanvas.width - padding * 2; const th = trajCanvas.height - padding * 2;
+    const sX = x => padding + (x / 600) * tw; const sY = y => padding + (y / 300) * th;
+    allSimRuns.forEach(run => {
+        tc.beginPath(); tc.moveTo(sX(run.data[0].x), sY(run.data[0].y));
+        run.data.forEach(p => tc.lineTo(sX(p.x), sY(p.y)));
+        tc.strokeStyle = run.color; tc.lineWidth = 1.5; tc.globalAlpha = 0.8; tc.stroke(); tc.globalAlpha = 1.0;
+    });
 }
+
+function updateLegend() {
+    const legendItems = document.getElementById('legend-items');
+    legendItems.innerHTML = '';
+    allSimRuns.forEach((run, index) => {
+        const item = document.createElement('div');
+        item.style.display = 'flex'; item.style.alignItems = 'center'; item.style.gap = '10px'; item.style.fontSize = '12px';
+        const dot = document.createElement('span'); dot.style.width = '10px'; dot.style.height = '10px'; dot.style.borderRadius = '50%'; dot.style.background = run.color;
+        const text = document.createElement('span');
+        text.innerHTML = `<strong>실험 ${index + 1}</strong> (${run.params.timestamp}) - 속도: ${run.params.speed}, 기억: ${run.params.memory}, 시야: ${run.params.fov}°`;
+        item.appendChild(dot); item.appendChild(text); legendItems.appendChild(item);
+    });
+}
+
+document.getElementById('clear-analysis-btn').addEventListener('click', () => {
+    allSimRuns = [];
+    document.getElementById('sim-analysis-area').classList.add('hidden');
+    document.getElementById('legend-items').innerHTML = '';
+});
 
 document.getElementById('start-sim-btn').addEventListener('click', () => {
   simRunning = !simRunning;
@@ -391,6 +382,9 @@ document.getElementById('start-sim-btn').addEventListener('click', () => {
     simStateBadge.textContent = "상태: 목적지 탐색 중";
     simStateBadge.style.background = "#2D63E2";
     updateSim();
+  } else {
+    simStateBadge.textContent = "상태: 일시정지";
+    simStateBadge.style.background = "#FF9800";
   }
 });
 
@@ -399,30 +393,55 @@ document.getElementById('reset-sim-btn').addEventListener('click', () => {
   simAgent = { x: 50, y: 150, history: [] };
   simStateBadge.textContent = "상태: 대기 중";
   simStateBadge.style.background = "#8B95A1";
-  document.getElementById('sim-analysis-area').classList.add('hidden');
   drawSim();
 });
 
 document.getElementById('analyze-sim-btn').addEventListener('click', () => {
-    drawPerformanceChart();
+    drawCharts();
+});
+
+document.getElementById('load-sim-csv-btn').addEventListener('click', () => {
+    document.getElementById('sim-csv-input').click();
+});
+
+document.getElementById('sim-csv-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const text = event.target.result;
+        const lines = text.split('\n').filter(l => l.trim() !== '');
+        const header = lines[0].toLowerCase().split(',');
+        const xIdx = header.findIndex(h => h.includes('x'));
+        const yIdx = header.findIndex(h => h.includes('y'));
+        const dIdx = header.findIndex(h => h.includes('dist'));
+        const importedData = lines.slice(1).map(l => {
+            const p = l.split(',');
+            return { x: parseFloat(p[xIdx] || 0), y: parseFloat(p[yIdx] || 0), dist: parseFloat(p[dIdx] || 0) };
+        });
+        if (importedData.length > 0) {
+            allSimRuns.push({
+                data: importedData,
+                params: { speed: 'CSV', fov: 'CSV', memory: 'CSV', timestamp: file.name },
+                color: colorPalette[allSimRuns.length % colorPalette.length]
+            });
+            drawCharts();
+        }
+    };
+    reader.readAsText(file);
 });
 
 document.getElementById('save-sim-csv-btn').addEventListener('click', () => {
     if (simAgent.history.length === 0) {
-        alert("저장할 데이터가 없습니다. 시뮬레이션을 먼저 실행해주세요.");
+        alert("저장할 데이터가 없습니다.");
         return;
     }
-
-    let csvContent = "Time,X,Y,Distance\n";
-    simAgent.history.forEach((p, index) => {
-        csvContent += `${(index * 0.1).toFixed(1)},${p.x.toFixed(2)},${p.y.toFixed(2)},${(p.dist || 0).toFixed(2)}\n`;
-    });
-
+    let csvContent = "Time,X,Y,Distance\n" + simAgent.history.map((p, i) => `${(i*0.1).toFixed(1)},${p.x.toFixed(2)},${p.y.toFixed(2)},${p.dist.toFixed(2)}`).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `cogarch_sim_result_${new Date().getTime()}.csv`);
+    link.setAttribute("download", `sim_result_${new Date().getTime()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
